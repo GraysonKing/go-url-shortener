@@ -44,3 +44,21 @@ func InitializeStore() *StorageService {
 
 	return storeService
 }
+
+// We want to be able to save the mapping between the originalUrl and the generated shortUrl url
+func SaveUrlMapping(shortUrl string, originalUrl string, userId string) {
+	err := storeService.redisClient.Set(ctx, shortUrl, originalUrl, CacheDuration).Err()
+	if err != nil {
+		panic(fmt.Sprintf("Failed saving key url | Error: %v - shortUrl: %s - originalUrl: %s\n", err, shortUrl, originalUrl))
+	}
+}
+
+// We should be able to retrieve the initial long URL once the short is provided.
+// This is when users will be calling the shortlink in the url, so we need to retrieve the long url and redirect.
+func RetrieveInitialUrl(shortUrl string) string {
+	result, err := storeService.redisClient.Get(ctx, shortUrl).Result()
+	if err != nil {
+		panic(fmt.Sprintf("Failed RetrieveInitialUrl url | Error: %v - shortUrl: %s\n", err, shortUrl))
+	}
+	return result
+}
