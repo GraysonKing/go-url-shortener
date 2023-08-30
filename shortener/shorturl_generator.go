@@ -3,6 +3,7 @@ package shortener
 import (
 	"crypto/sha256"
 	"fmt"
+	"math/big"
 	"os"
 
 	"github.com/itchyny/base58-go"
@@ -24,4 +25,11 @@ func base58Encoded(bytes []byte) string {
 		os.Exit(1)
 	}
 	return string(encoded)
+}
+
+func GenerateShortLink(initialLink string, usedId string) string {
+	urlHashbytes := sha256Of(initialLink + usedId)
+	generateNumber := new(big.Int).SetBytes(urlHashbytes).Uint64()
+	finalString := base58Encoded([]byte(fmt.Sprintf("%d", generateNumber)))
+	return finalString[:8]
 }
